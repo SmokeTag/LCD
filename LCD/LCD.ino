@@ -57,10 +57,6 @@ volatile bool pause_flag = 0x01;
 // --- Configurações Iniciais ---
 void setup()
 {
-
-  Serial.begin(9600);                                           // Inicializa monitor serial [Remover para produto final]
-  Serial.println("Inicializando...");
-
 // Inicializa LCD
   lcd_init();
   send_char_pos('0',1,1);
@@ -148,10 +144,11 @@ void read_bt_pause()
   static bool bt_flag = 0x00;                                   // Inicia flag de precionamento do botão
   static unsigned long bt_bounce = 0;                           // Inicial a variável bt_bounce
 
-  if(!(PINC & bt_pause) && (millis() - bt_bounce > 3))          // Verifica se o botão foi pressionado (Aqui o único propósito é evitar o bounce do botão)
+  if(!(PINC & bt_pause) && !bt_flag && (millis() - bt_bounce > debounce_time))          // Verifica se o botão foi pressionado (Aqui o único propósito é evitar o bounce do botão)
   {
     bt_bounce = millis();                                       // Atualiza o tempo desde o último bounce
     bt_flag = 0x01;                                             // Ativa a flag
+    return;
   }
 
   if(PINC & bt_pause && bt_flag && (millis() - bt_bounce > debounce_time) && (millis() - bt_bounce < reset_time))      // Verifica se o botão foi solto, se a flag esta ativa e se o tempo desde o ultimo bouce é maior que debounce_time
@@ -160,18 +157,26 @@ void read_bt_pause()
     tempo_anterior = millis();
     bt_bounce = tempo_anterior + 35;
     pause_flag ^= 0x01;                                         // Inverte o valor da pause_flag
+    return;
   }
 
   if (PINC & bt_pause && bt_flag && pause_flag && (millis() - bt_bounce > reset_time) && (millis() - bt_bounce < regret_time))
   {
     bt_flag = 0x00;
-    bt_bounce = millis() + 35;
+    bt_bounce = millis();
 
     horas = 0;
     minutos = 0;
     segundos = 0;
     milissegundos = 0;
     lcd_update();
+    return;
+  }
+    if (PINC & bt_pause && bt_flag && (millis() - bt_bounce > reset_time))
+  {
+    bt_flag = 0x00;
+    bt_bounce = millis();
+    return;
   }
 }
 

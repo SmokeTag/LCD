@@ -34,7 +34,7 @@ void send_char(char character);                                 // Envia caracte
 void lcd_init();                                                // Inicia o display
 void lcd_clear();                                               // Limpa o display (Apagar função caso n seja utilizada)
 void send_byte(char s_byte);                                    // Envia um byte para o barramento de dados [função estrutural]
-void pulse_enable();                                            // Envia um pulso de enable [função estrutural]
+void pulse_enable(int time);                                    // Envia um pulso de enable [função estrutural]
 
 
 // =====================================================================================
@@ -225,10 +225,9 @@ void lcd_update()
 
 void set_col(char address)
 {
-  PORTB &= ~rs;
   send_byte(address);
   PORTD |= db7; 
-  pulse_enable();
+  pulse_enable(50);
    
 } //end set_col
 
@@ -256,8 +255,8 @@ void send_char(char character)
 
    send_byte(character); 
    PORTB |= rs;
-   delayMicroseconds(200);
-   pulse_enable();
+   delayMicroseconds(5);
+   pulse_enable(50);
    PORTB &= ~rs;
   
 } //end send_char_pos
@@ -293,23 +292,23 @@ void lcd_init()
    PORTB &= ~en;
    PORTB &= ~rs;
    send_byte(0x00);
-   delayMicroseconds(200);
+   delayMicroseconds(20);
    
-   // LIMPA LCD
-   send_byte(0x01);
-   pulse_enable();
+   // LCD CLEAR
+   //send_byte(0x01);
+   //pulse_enable(50);
 
-   // MODO DE 8 BITS
-   send_byte(0x38);
-   pulse_enable();
+   // FUNCTION SET
+   send_byte(0x38); //8-bit; 2-lines; 5x8-dots
+   pulse_enable(50);
 
-   // LIGA LCD, DESLIGA CURSOR, DESLIGA BLINK
-   send_byte(0x0C); //desliga cursor
-   pulse_enable();
+    // DISPLAY ON/OFF CONTROL
+   send_byte(0x0C); // Display on; Cursor off; Blinking off
+   pulse_enable(50);
 
    // HABILITA INCREMENTO, DESLIGA SCROLL
-   send_byte(0x06);
-   pulse_enable();
+   //send_byte(0x06);
+   //pulse_enable(50);
   
 } //end lcd_init
 
@@ -318,9 +317,8 @@ void lcd_clear()
 {
 
    // LIMPA LCD
-   PORTB &= ~rs;
    send_byte(0x01);
-   pulse_enable();
+   pulse_enable(2000);
 
 } //end lcd_clear
 
@@ -335,14 +333,12 @@ void send_byte(char s_byte)
 } //end send_byte
 
 
-void pulse_enable()
+void pulse_enable(int time)
 {
-   PORTB &= ~en;
-   delayMicroseconds(800);
    PORTB |= en;
-   delayMicroseconds(200);
+   delayMicroseconds(5);
    PORTB &= ~en;
-   delayMicroseconds(800);  
+   delayMicroseconds(time);  
   
 } //end pulse_enable
 

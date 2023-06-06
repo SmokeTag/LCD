@@ -1,17 +1,10 @@
 // =====================================================================================
+// --- Libriries ---
+#include <LCD8b.h>
+
+
+// =====================================================================================
 // --- Mapeamento de Hardware ---
-#define  db7  (1<<PD7)      // LCD
-#define  db6  (1<<PD6)      // LCD
-#define  db5  (1<<PD5)      // LCD
-#define  db4  (1<<PD4)      // LCD
-#define  db3  (1<<PB3)      // LCD
-#define  db2  (1<<PB2)      // LCD
-#define  db1  (1<<PB1)      // LCD
-#define  db0  (1<<PB0)      // LCD
-
-#define  rs   (1<<PB5)      // LCD
-#define  en   (1<<PB4)      // LCD
-
 #define  bt_pause (1<<PC4)  // Botão conectado ao pino A0
 #define  bt_reset (1<<PC5)  // Botão conectado ao pino A1
 
@@ -22,25 +15,16 @@ const int debounce_time = 30;
 const int reset_time = 800;
 const int regret_time = 6000;
 
+
 // =====================================================================================
 // --- Protótipo das Funções ---
 void read_bt_pause();                                           // Lê botão fazendo debounce digital
 void read_bt_reset();                                           // Lê um botão fazendo debounce digital
 void lcd_update();                                              // Atualiza o display (somente cronometro)
-void char_pos(char row, char col);                              // Define a posição do cursor no display (linha, coluna)
-void set_col(char address);                                     // Define a posição do cursor no display (coluna) [função estrutural]
-void send_char_pos(char character, char row, char col);         // Envia caracter e posição
-void send_char(char character);                                 // Envia caracter
-void lcd_init();                                                // Inicia o display
-void lcd_clear();                                               // Limpa o display (Apagar função caso n seja utilizada)
-void send_byte(char s_byte);                                    // Envia um byte para o barramento de dados [função estrutural]
-void pulse_enable(int time);                                    // Envia um pulso de enable [função estrutural]
 
 
 // =====================================================================================
 // --- Variáveis Globais ---
-// Interrupções externas
-
 // Cronômetro
 volatile unsigned long tempo_anterior = 0;
 volatile int horas = 0;
@@ -221,126 +205,6 @@ void lcd_update()
   send_char_pos(dez+48,1,9);
   send_char(uni+48);
 }
-
-
-void set_col(char address)
-{
-  send_byte(address);
-  PORTD |= db7; 
-  pulse_enable(50);
-   
-} //end set_col
-
-
-void char_pos(char row, char col)
-{
-   col -= 1;
-
-   switch(row)
-   {
-      case 1: set_col(col);      break; 
-      case 2: set_col(col+0x40); break;
-    
-   } //end switch
-  
-} //end char_pos
-
-
-// =====================================================================================
-// --- Função para Envio de Caracteres ---
-
-
-void send_char(char character)
-{
-
-   send_byte(character); 
-   PORTB |= rs;
-   delayMicroseconds(5);
-   pulse_enable(50);
-   PORTB &= ~rs;
-  
-} //end send_char_pos
-
-
-void send_char_pos(char character, char row, char col)
-{
-
-  char_pos(row, col);
-  send_char(character); 
-  
-} //end send_char_pos
-
-
-// =====================================================================================
-// --- Função para Inicializar LCD ---
-void lcd_init()
-{
-
-   //configura saídas
-   DDRB |= db0;
-   DDRB |= db1;
-   DDRB |= db2;
-   DDRB |= db3;
-   DDRB |= rs;
-   DDRB |= en;
-   DDRD |= db4;
-   DDRD |= db5;
-   DDRD |= db6;
-   DDRD |= db7;
-
-   //inicializa saídas
-   PORTB &= ~en;
-   PORTB &= ~rs;
-   send_byte(0x00);
-   delayMicroseconds(20);
-   
-   // LCD CLEAR
-   //send_byte(0x01);
-   //pulse_enable(50);
-
-   // FUNCTION SET
-   send_byte(0x38); //8-bit; 2-lines; 5x8-dots
-   pulse_enable(50);
-
-    // DISPLAY ON/OFF CONTROL
-   send_byte(0x0C); // Display on; Cursor off; Blinking off
-   pulse_enable(50);
-
-   // HABILITA INCREMENTO, DESLIGA SCROLL
-   //send_byte(0x06);
-   //pulse_enable(50);
-  
-} //end lcd_init
-
-
-void lcd_clear()
-{
-
-   // LIMPA LCD
-   send_byte(0x01);
-   pulse_enable(2000);
-
-} //end lcd_clear
-
-
-void send_byte(char s_byte)
-{
-  PORTB &= ~(db0 | db1 | db2 | db3);
-  PORTD &= ~(db4| db5 | db6 | db7);
-
-  PORTB |= s_byte & (db3 | db2 | db1 | db0);
-  PORTD |= s_byte & (db4 | db5 | db6 | db7);
-} //end send_byte
-
-
-void pulse_enable(int time)
-{
-   PORTB |= en;
-   delayMicroseconds(5);
-   PORTB &= ~en;
-   delayMicroseconds(time);  
-  
-} //end pulse_enable
 
 
 // =====================================================================================

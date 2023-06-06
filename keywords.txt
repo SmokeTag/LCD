@@ -1,0 +1,16 @@
+#######################################
+# Syntax Coloring Map For LCD8b
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+lcd_init	KEYWORD2
+send_char_pos	KEYWORD2
+send_char	KEYWORD2
+char_pos	KEYWORD2
+lcd_clear	KEYWORD2
+set_col	KEYWORD2
+send_byte	KEYWORD2
+pulse_enable	KEYWORD2

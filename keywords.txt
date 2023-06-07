@@ -7,6 +7,7 @@
 #######################################
 
 lcd_init	KEYWORD2
+lcd_print	KEYWORD2
 send_char_pos	KEYWORD2
 send_char	KEYWORD2
 char_pos	KEYWORD2

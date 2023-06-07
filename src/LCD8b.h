@@ -17,7 +17,9 @@
     #include <inttypes.h>
     #include "Arduino.h"
 
-    void lcd_init();                                             // Inicia o display
+    void lcd_init();                                             // Inicializes the LCD
+    void lcd_print(char *str);                                   // print a string of characters in the LCD
+    void lcd_print_slow(char *str, int time);                         // print a string of characters in the LCD
     void send_char_pos(char character, char row, char col);      // Envia caracter e posição
     void send_char(char character);                              // Envia caracter
     void char_pos(char row, char col);                           // Define cursor position on display (row, column)

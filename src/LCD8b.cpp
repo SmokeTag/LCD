@@ -18,25 +18,35 @@ void lcd_init() {
    PORTB &= ~en;
    PORTB &= ~rs;
    send_byte(0x00);
-   delayMicroseconds(20);
-   
-   // LCD CLEAR
-   //send_byte(0x01);
-   //pulse_enable(45);
+   delayMicroseconds(1);
 
    // FUNCTION SET
    send_byte(0x38); //8-bit; 2-lines; 5x8-dots
-   pulse_enable(50);
+   pulse_enable(40);
 
     // DISPLAY ON/OFF CONTROL
    send_byte(0x0C); // Display on; Cursor off; Blinking off
-   pulse_enable(50);
+   pulse_enable(40);
 
-   // HABILITA INCREMENTO, DESLIGA SCROLL
-   //send_byte(0x06);
-   //pulse_enable(50);
-  
+   lcd_clear();
 } //end lcd_init
+
+
+void lcd_print(char *str) {
+   while (*str != '\0') {
+      send_char(*str);
+      str++;
+   } //end while
+} // end lcd_print
+
+
+  void lcd_print_slow(char *str, int time) {
+   while (*str != '\0') {
+      send_char(*str);
+      delay(time);
+      str++;
+   } //end while
+} // end lcd_print
 
 
 void send_char_pos(char character, char row, char col) {
@@ -65,7 +75,7 @@ void char_pos(char row, char col) {
 
 void lcd_clear() {
    send_byte(0x01);
-   pulse_enable(100);
+   pulse_enable(1700);
 } //end lcd_clear
 
 
